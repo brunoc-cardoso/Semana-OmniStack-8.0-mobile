@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
+import io from 'socket.io-client';
 import { StyleSheet, SafeAreaView, View, Image, Text, TouchableOpacity } from 'react-native';
 
 import api from '../services/api';
@@ -10,6 +11,7 @@ import dislike from '../assets/dislike.png';
 export default function Main({ navigation }) {
   const id = navigation.getParam('user');
   const [users, setUsers] = useState([]);
+  const [matchDev, setMatchDev] = useState(true);
 
   useEffect(() => {
     async function loadUsers() {
@@ -21,6 +23,17 @@ export default function Main({ navigation }) {
     };
 
     loadUsers();
+  }, [id]);
+
+  useEffect(() => {
+    const socket = io('http://192.168.0.103:3333', {
+      query: { user: id }
+    });
+
+    socket.on('match', dev => {
+      setMatchDev(dev);
+    });
+
   }, [id]);
 
   async function handleLike() {
